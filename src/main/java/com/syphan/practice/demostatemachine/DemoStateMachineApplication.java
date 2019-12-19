@@ -23,12 +23,19 @@ public class DemoStateMachineApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-//        stateMachine.sendEvent(Events.assemble);
-//        stateMachine.sendEvent(Events.deliver);
+        //khong cho phep chuyen trang thai
+        ordersStateHandler.handleEvent(
+                MessageBuilder
+                        .withPayload(Events.claim)
+                        .setHeader("order-id", 100L)
+                        .build(), States.ASSEMBLED);
+
+        //cho phep chuyen trang thai
         ordersStateHandler.handleEvent(
                 MessageBuilder
                         .withPayload(Events.deliver)
                         .setHeader("order-id", 100L)
+                        .setHeader("stateBefore", States.ASSEMBLED)
                         .build(), States.ASSEMBLED);
     }
 }

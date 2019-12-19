@@ -10,34 +10,25 @@ import org.springframework.statemachine.support.StateMachineInterceptorAdapter;
 import org.springframework.statemachine.transition.Transition;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @Component
-public class OrdersStateHandler extends LifecycleObjectSupport implements OrderStateChangeListener {
+public class OrdersStateHandler extends LifecycleObjectSupport {
+
     @Autowired
     private StateMachine<States, Events> stateMachine;
-
-    private Set<OrderStateChangeListener> listeners = new HashSet<>();
 
     @Override
     protected void onInit() throws Exception {
         stateMachine
                 .getStateMachineAccessor()
                 .doWithAllRegions(function -> function.addStateMachineInterceptor(new StateMachineInterceptorAdapter<States, Events>() {
-//                    @Override
-//                    public void preStateChange(State<States, Events> state, Message message) {
-//                        listeners.forEach(listener -> listener.onStateChange(state, message));
-//                    }
                     @Override
                     public void preStateChange(State<States, Events> state, Message<Events> message, Transition<States, Events> transition, StateMachine<States, Events> stateMachine) {
-                        listeners.forEach(listener -> listener.onStateChange(state, message));
+                        if (message.getPayload().equals(Events.deliver)) {
+                            System.out.println("oke bay be");
+                            onStateChange(state, message);
+                        }
                     }
                 }));
-    }
-
-    public void registerListener(OrderStateChangeListener listener) {
-        listeners.add(listener);
     }
 
     public void handleEvent(Message<Events> event, States sourceState) {
@@ -49,13 +40,11 @@ public class OrdersStateHandler extends LifecycleObjectSupport implements OrderS
         stateMachine.sendEvent(event);
 
         System.out.println();
-//        Long orderId = event.getHeaders().get("order-id", Long.class);
-//        System.out.println("#############---------------- " + orderId);
     }
 
-    @Override
-    public void onStateChange(State<States, Events> state, Message<Events> message) {
+    //    @Override
+    private void onStateChange(State<States, Events> state, Message<Events> message) {
         Long orderId = message.getHeaders().get("order-id", Long.class);
-        System.out.println("#############---------------- " + orderId);
+        System.out.println("#############---------------- " + orderId + ", status: " + state.getId());
     }
 }
