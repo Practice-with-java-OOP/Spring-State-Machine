@@ -2,7 +2,6 @@ package com.syphan.practice.demostatemachine.config;
 
 import com.syphan.practice.demostatemachine.service.BookEvents;
 import com.syphan.practice.demostatemachine.service.BookStates;
-import com.syphan.practice.demostatemachine.service.LoggingMaListener;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +12,9 @@ import org.springframework.statemachine.config.StateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
+import org.springframework.statemachine.listener.StateMachineListener;
+import org.springframework.statemachine.listener.StateMachineListenerAdapter;
+import org.springframework.statemachine.state.State;
 
 import java.util.EnumSet;
 
@@ -57,7 +59,8 @@ public class StateMachineConfig extends StateMachineConfigurerAdapter<BookStates
     public void configure(StateMachineConfigurationConfigurer<BookStates, BookEvents> config) throws Exception {
         config.withConfiguration()
                 .autoStartup(true)
-                .listener(new LoggingMaListener());
+                .listener(listener());
+//                .listener(new LoggingMaListener());
     }
 
     @Bean
@@ -76,5 +79,16 @@ public class StateMachineConfig extends StateMachineConfigurerAdapter<BookStates
                 .event(BookEvents.BORROW);
 
         return builder.build();
+    }
+
+    @Bean
+    public StateMachineListener<BookStates, BookEvents> listener() {
+        return new StateMachineListenerAdapter<BookStates, BookEvents>() {
+            @Override
+            public void stateChanged(State<BookStates, BookEvents> from, State<BookStates, BookEvents> to) {
+                System.out.println("State change to " + to.getId());
+                System.out.println();
+            }
+        };
     }
 }
