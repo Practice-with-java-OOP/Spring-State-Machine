@@ -8,16 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.statemachine.StateMachine;
 
 @SpringBootApplication
 @Log4j2
 public class DemoStateMachineApplication implements CommandLineRunner {
-
-//    @Autowired
-//    private StateMachine<States, Events> stateMachine;
 
     @Autowired
     private OrdersStateHandler ordersStateHandler;
@@ -30,7 +25,10 @@ public class DemoStateMachineApplication implements CommandLineRunner {
     public void run(String... args) throws Exception {
 //        stateMachine.sendEvent(Events.assemble);
 //        stateMachine.sendEvent(Events.deliver);
-        Message<Events> message = MessageBuilder.withPayload().setHeader().build();
-        ordersStateHandler.handleEvent();
+        ordersStateHandler.handleEvent(
+                MessageBuilder
+                        .withPayload(Events.deliver)
+                        .setHeader("order-id", 100L)
+                        .build(), States.ASSEMBLED);
     }
 }

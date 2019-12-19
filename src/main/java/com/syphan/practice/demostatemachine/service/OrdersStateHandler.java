@@ -40,20 +40,22 @@ public class OrdersStateHandler extends LifecycleObjectSupport implements OrderS
         listeners.add(listener);
     }
 
-    public void handleEvent(Message event, States sourceState)
-    {
+    public void handleEvent(Message<Events> event, States sourceState) {
         stateMachine.stop();
         stateMachine
                 .getStateMachineAccessor()
                 .doWithAllRegions(access -> access.resetStateMachine(new DefaultStateMachineContext<States, Events>(sourceState, null, null, null)));
         stateMachine.start();
         stateMachine.sendEvent(event);
+
+        System.out.println();
+//        Long orderId = event.getHeaders().get("order-id", Long.class);
+//        System.out.println("#############---------------- " + orderId);
     }
 
     @Override
     public void onStateChange(State<States, Events> state, Message<Events> message) {
         Long orderId = message.getHeaders().get("order-id", Long.class);
-
         System.out.println("#############---------------- " + orderId);
     }
 }
